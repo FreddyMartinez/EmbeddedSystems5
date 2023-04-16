@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BaseUrl = `http://192.168.1.144:8080`;
+const BaseUrl = `http://192.168.1.147`;
 
 export async function toggleLight(state: boolean, light: string) {
   const content = {

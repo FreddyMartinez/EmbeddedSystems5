@@ -6,7 +6,7 @@ import { readLedState, writeLedState } from './saveFile';
 const app = express();
 app.use(cors({origin: '*'}));
 app.use(bodyParser.json())
-const port = 8080;
+const port = 80;
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -19,7 +19,7 @@ app.get('/led', async (req, res) => {
 
 app.post('/led', async (req, res) => {
   const {state, light} = req.body;
-  console.log(light);
+  console.log(`${light} turn ${state ? 'off' : 'on'}`);
   await writeLedState(light, state);
   res.json({newState: !state});
 })
