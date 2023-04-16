@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toggleLight } from '../services/lightService'
 
 const getLabelText = (state: boolean) => state ? 'encendido' : 'apagado'
 const getButtonText = (state: boolean) => state ? 'Apagar' : 'Encender'
@@ -8,11 +9,20 @@ export function Form() {
   const [green, setGreen] = useState(false)
 
   const toggleRedLed = () => {
-    setRed(c => !c)
+    toggleLight(red, 'red').then(
+      res => {
+        console.log(res);
+        setRed(c => !c)
+      }
+    )
   }
 
   const toggleGreenLed = () => {
-    setGreen((c) => !c)
+    toggleLight(green, 'green').then(
+      () => {
+        setGreen((c) => !c)
+      }
+    )
   }
 
   return (
