@@ -1,5 +1,10 @@
-import { useState } from 'react'
-import { toggleLight } from '../services/lightService'
+import { useEffect, useState } from 'react'
+import { getInitialState, toggleLight } from '../services/lightService'
+
+interface State {
+  red: boolean
+  green: boolean
+}
 
 const getLabelText = (state: boolean) => state ? 'encendido' : 'apagado'
 const getButtonText = (state: boolean) => state ? 'Apagar' : 'Encender'
@@ -24,6 +29,15 @@ export function Form() {
       }
     )
   }
+
+  useEffect(()=> {
+    getInitialState().then(
+      (state: State) => {
+        setRed(!state.red)
+        setGreen(!state.green)
+      }
+    )
+  }, [])
 
   return (
     <div className="main-container">
