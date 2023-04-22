@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { readLedState, writeLedState } from './saveFile';
+import { readLedState, toggleLed, writeLedState } from './saveFile';
 
 const app = express();
 app.use(cors({origin: '*'}));
@@ -23,6 +23,13 @@ app.post('/led', async (req, res) => {
   await writeLedState(light, state);
   res.json({newState: !state});
 })
+
+app.get('/toggle-led/:led', async (req, res) => {
+  const led = req.params.led;
+  console.log(`toggle ${led}`);
+  const state = await toggleLed(led);
+  res.json(state);
+});
 
 app.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);

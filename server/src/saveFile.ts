@@ -14,6 +14,12 @@ export async function writeLedState(led: string, state: boolean) {
   await writeFile(ledFile, JSON.stringify(ledState, null, 2));
 }
 
+export async function toggleLed(led: string) {
+  const ledState = await readLedState();
+  ledState[led] = !ledState[led];
+  await writeFile(ledFile, JSON.stringify(ledState, null, 2));
+}
+
 export async function savePotRead(value: number) {
   appendFile(potFile, `${new Date().toDateString()}, ${value}`)
 }
