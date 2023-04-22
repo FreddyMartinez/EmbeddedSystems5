@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getInitialState, toggleLight } from '../services/lightService'
+import { State } from './types'
+import { manager } from '../services/SSEManager'
 
-interface State {
-  red: boolean
-  green: boolean
-}
 
 const getLabelText = (state: boolean) => state ? 'encendido' : 'apagado'
 const getButtonText = (state: boolean) => state ? 'Apagar' : 'Encender'
@@ -30,6 +28,11 @@ export function Form() {
     )
   }
 
+  const observer = (state: State) => {
+    setRed(!state.red)
+    setGreen(!state.green)
+  }
+
   useEffect(()=> {
     getInitialState().then(
       (state: State) => {
@@ -37,6 +40,11 @@ export function Form() {
         setGreen(!state.green)
       }
     )
+    manager.subscribe(observer);
+
+    return () => {
+      manager.unsubscribe(observer);
+    };
   }, [])
 
   return (
