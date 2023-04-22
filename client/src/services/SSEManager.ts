@@ -1,5 +1,5 @@
 import { State } from "../components/types"
-import { BaseUrl } from "./lightService"
+import { BaseUrl, getInitialState } from "./lightService"
 
 type Observer = (state: State) => void
 
@@ -34,4 +34,28 @@ class SSEManager {
   }
 }
 
-export const manager = new SSEManager();
+class FakeManager {
+  observers: Observer[] = []
+
+  constructor() {
+    setInterval(() => {
+      getInitialState().then((state: State) => {
+        this.notify(state);
+      })
+    }, 500)
+  }
+
+  subscribe(observer: Observer) {
+    this.observers.push(observer);
+  }
+
+  unsubscribe(observer: Observer) {
+    this.observers = this.observers.filter(o => o !== observer);
+  }
+
+  notify(state: State) {
+    this.observers.forEach(o => o(state))
+  }
+}
+
+export const manager = new FakeManager();
