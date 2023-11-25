@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { readLedState, toggleLed, writeLedState } from './saveFile';
+import { readLedState, toggleLed, updateLedState } from './saveFile';
 import { CreateEventsSubscription, sendEventsToAll } from './serverSentEvents';
 
 const app = express();
@@ -21,10 +21,11 @@ app.get('/led', async (req, res) => {
 app.post('/led', async (req, res) => {
   const {state, light} = req.body;
   console.log(`${light} turn ${state ? 'off' : 'on'}`);
-  await writeLedState(light, state);
-  res.json({newState: !state});
+  await updateLedState(light, state);
+  res.json({newState: state});
 })
 
+// This is not an idempotent request. Not recommended.
 app.get('/toggle-led/:led', async (req, res) => {
   const led = req.params.led;
   console.log(`toggle ${led}`);
