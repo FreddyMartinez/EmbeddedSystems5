@@ -1,44 +1,60 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import { readLedState } from "./saveFile";
 import { State } from "./types";
 
 const headers = {
-  'Content-Type': 'text/event-stream',
-  'Cache-Control': 'no-cache',
+  "Content-Type": "text/event-stream",
+  "Cache-Control": "no-cache",
 };
 
-interface Client {id: number, response: Response}
-let clients: Client[] = [];
+class Client {
+  #response: Response;
 
-export async function CreateEventsSubscription(request: Request, response: Response) {
+  constructor(res: Response) {
+    this.#response = res;
+  }
+
+  sendMessage(message: string) {
+    this.#response.write(`data: ${message} \n\n`);
+  }
+
+  sendObject(obj: unknown) {
+    this.sendMessage(JSON.stringify(obj));
+  }
+
+  closeConnection() {
+    this.#response.end();
+  }
+}
+
+let clients = new Map<number, Client>();
+
+export async function CreateEventsSubscription(
+  request: Request,
+  response: Response
+) {
   response.writeHead(200, headers);
 
-  const state = await readLedState();
-  response.write(`data: ${JSON.stringify(state)} \n\n`);
-
   const clientId = Date.now();
+  const newClient = new Client(response);
 
-  const newClient = {
-    id: clientId,
-    response
-  };
+  const state = await readLedState();
+  newClient.sendObject(state);
 
-  clients.push(newClient);
+  clients.set(clientId, newClient);
 
-  request.on('close', () => {
+  request.on("close", () => {
     console.log(`${clientId} Connection closed`);
-    clients = clients.filter(client => client.id !== clientId);
+    clients.delete(clientId);
   });
-  
-  response.on('close', () => {
+
+  response.on("close", () => {
     console.log(`${clientId} Connection closed`);
-    clients = clients.filter(client => client.id !== clientId);
+    clients.delete(clientId);
   });
 }
 
 export function sendEventsToAll(state: State) {
-  console.log(clients.length)
-  clients.forEach((client) =>
-    client.response.write(`data: ${JSON.stringify(state)} \n\n`)
-  );
+  console.log(clients.size);
+  clients.forEach((client) => client.sendObject(state));
 }
